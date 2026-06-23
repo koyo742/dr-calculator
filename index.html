@@ -1,1062 +1,566 @@
 <!DOCTYPE html>
-
 <html lang="ko">
-
 <head>
-
 <meta charset="UTF-8">
-
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
 <title>디알 장비 및 능력치 계산기 V2.1</title>
-
 <style>
-
 * { box-sizing: border-box; word-break: keep-all; }
-
 body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #0f172a; color: #f8fafc; margin: 0; padding: 20px; }
-
 h1 { text-align: center; color: #38bdf8; margin-bottom: 5px; font-size: 1.8rem; }
-
 .subtitle { text-align: center; color: #94a3b8; margin-bottom: 20px; font-size: 0.95rem; }
-
-
 /* 탭 버튼 디자인 */
-
 .tabs-container { display: flex; justify-content: center; gap: 10px; margin-bottom: 25px; }
-
 .tab-btn { background-color: #1e293b; color: #94a3b8; border: 2px solid #334155; padding: 12px 30px; font-size: 1.1rem; font-weight: bold; border-radius: 8px; cursor: pointer; transition: all 0.3s ease; }
-
 .tab-btn:hover { color: #f8fafc; border-color: #475569; }
-
 .tab-btn.active { background-color: #38bdf8; color: #0f172a; border-color: #38bdf8; }
-
-
 /* 탭 콘텐츠 및 저장 버튼 */
-
 .tab-content { display: none; }
-
 .tab-content.active { display: block; }
-
-
 .action-buttons { display: flex; justify-content: flex-end; gap: 10px; margin: 0 auto 15px auto; max-width: 1500px; }
-
 .action-buttons button { padding: 10px 20px; border: none; border-radius: 6px; font-weight: bold; cursor: pointer; color: white; transition: 0.2s; }
-
 .btn-save { background-color: #10b981; } .btn-save:hover { background-color: #059669; }
-
 .btn-load { background-color: #3b82f6; } .btn-load:hover { background-color: #2563eb; }
-
 /* 개발중 안내 디자인 */
-
 .dev-notice { text-align: center; padding: 100px 20px; background-color: #1e293b; border-radius: 12px; border: 2px dashed #f59e0b; max-width: 800px; margin: 0 auto; color: #fbbf24; }
-
 .dev-notice h2 { font-size: 2rem; margin-bottom: 15px; }
-
 /* 대시보드 레이아웃 */
-
 .dashboard { max-width: 1500px; margin: 0 auto; display: flex; flex-direction: column; gap: 20px; }
-
 .summary-board { display: flex; gap: 20px; }
-
 .summary-card { flex: 1; background-color: #1e293b; padding: 20px; border-radius: 12px; border: 1px solid #334155; box-shadow: 0 4px 12px rgba(0,0,0,0.5); }
-
 .summary-title { font-size: 1.3rem; text-align: center; margin-bottom: 15px; font-weight: bold; }
-
 .title-curr { color: #10b981; } .title-comp { color: #f59e0b; }
-
 .score-val { font-size: 2.3rem; font-weight: bold; text-align: center; margin-bottom: 20px; }
-
 .score-curr { color: #34d399; } .score-comp { color: #fbbf24; }
-
-
 .stat-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; }
-
 .stat-row { display: flex; justify-content: space-between; padding: 8px 10px; background-color: #0f172a; border-radius: 6px; font-size: 0.9rem; }
-
 .diff-up { color: #34d399; font-weight: bold; } .diff-down { color: #f87171; font-weight: bold; } .diff-same { color: #64748b; }
-
 /* 장비 세팅 보드 */
-
 .equip-board { display: flex; gap: 20px; }
-
 .equip-panel { flex: 1; background-color: #1e293b; padding: 20px; border-radius: 12px; border: 1px solid #334155; }
-
 .panel-h2 { margin-top: 0; margin-bottom: 20px; text-align: center; font-size: 1.2rem; padding-bottom: 10px; border-bottom: 2px solid #334155; }
-
 .equipment-group { margin-bottom: 15px; background-color: rgba(15, 23, 42, 0.6); padding: 12px; border-radius: 8px; }
-
 .group-title { font-size: 1rem; color: #94a3b8; margin-bottom: 10px; font-weight: bold; }
-
 .grid-slots { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
-
 .slot { display: flex; flex-direction: column; }
-
 .slot-full { grid-column: span 3; }
-
 label { font-size: 0.8rem; margin-bottom: 6px; color: #64748b; }
-
-
 .select-group { display: flex; gap: 6px; }
-
-.item-base { flex: 2; width: 100%; }
-
-.item-mod { flex: 1; display: none; width: 100%; background-color: #1e293b; color: #38bdf8; font-weight: bold; text-align: center; }
-
-select:focus { border-color: #38bdf8; }
+.item-base { flex: 2; width: 100%; background-color: #0f172a; color: #f8fafc; border: 1px solid #334155; padding: 8px; border-radius: 6px; cursor: pointer; }
+.item-mod { flex: 1; display: none; width: 100%; background-color: #1e293b; color: #38bdf8; font-weight: bold; text-align: center; border: 1px solid #334155; padding: 8px; border-radius: 6px; cursor: pointer; }
+select:focus { border-color: #38bdf8; outline: none; }
 
 @media (max-width: 1024px) { .equip-board { flex-direction: column; } }
-
 @media (max-width: 768px) {
-
-body { padding: 10px; } h1 { font-size: 1.5rem; }
-
-.tabs-container { flex-direction: column; gap: 5px; }
-
-.summary-board { flex-direction: column; } .stat-grid { grid-template-columns: 1fr; }
-
-.grid-slots { grid-template-columns: 1fr; } .slot-full { grid-column: span 1; }
-
-.score-val { font-size: 1.8rem; } select { padding: 10px; font-size: 0.95rem; }
-
+  body { padding: 10px; } h1 { font-size: 1.5rem; }
+  .tabs-container { flex-direction: column; gap: 5px; }
+  .summary-board { flex-direction: column; } .stat-grid { grid-template-columns: 1fr; }
+  .grid-slots { grid-template-columns: 1fr; } .slot-full { grid-column: span 1; }
+  .score-val { font-size: 1.8rem; } select { padding: 10px; font-size: 0.95rem; }
 }
-
 </style>
-
 </head>
-
 <body>
 
 <h1>🛡️ 디지몬 알피지 장비 및 데미지 종합 계산기 V2.1</h1>
-
 <div class="subtitle">모든 스펙 시뮬레이션을 한 곳에서!</div>
 
 <!-- 탭 네비게이션 -->
-
 <div class="tabs-container">
-
-<button class="tab-btn active" onclick="switchTab(event, 'tab-equip')">장비 및 능력치</button>
-
-<button class="tab-btn" onclick="switchTab(event, 'tab-damage')">데미지 계산기</button>
-
+  <button class="tab-btn active" onclick="switchTab(event, 'tab-equip')">장비 및 능력치</button>
+  <button class="tab-btn" onclick="switchTab(event, 'tab-damage')">데미지 계산기</button>
 </div>
 
 <!-- 1번 탭: 장비 및 능력치 -->
-
 <div id="tab-equip" class="tab-content active">
-
-
-<div class="action-buttons">
-
-<button class="btn-save" onclick="saveSetup()">💾 현재 세팅 브라우저에 저장</button>
-
-<button class="btn-load" onclick="loadSetup()">📂 저장된 세팅 불러오기</button>
-
-</div>
-
-<div class="dashboard">
-
-<div class="summary-board">
-
-<div class="summary-card">
-
-<div class="summary-title title-curr">현재 장착 스탯</div>
-
-<div class="score-val score-curr" id="curr-score">0</div>
-
-<div class="stat-grid" id="curr-stats-container"></div>
-
-</div>
-
-
-<div class="summary-card">
-
-<div class="summary-title title-comp">변경 예상 스탯</div>
-
-<div class="score-val score-comp" id="comp-score">0 <span id="diff-score" style="font-size:1.1rem;"></span></div>
-
-<div class="stat-grid" id="comp-stats-container"></div>
-
-</div>
-
-</div>
-
-<div class="equip-board" id="equip-container"></div>
-
-</div>
-
+  <div class="action-buttons">
+    <button class="btn-save" onclick="saveSetup()">💾 현재 세팅 브라우저에 저장</button>
+    <button class="btn-load" onclick="loadSetup()">📂 저장된 세팅 불러오기</button>
+  </div>
+  <div class="dashboard">
+    <div class="summary-board">
+      <div class="summary-card">
+        <div class="summary-title title-curr">현재 장착 스탯</div>
+        <div class="score-val score-curr" id="curr-score">0</div>
+        <div class="stat-grid" id="curr-stats-container"></div>
+      </div>
+      <div class="summary-card">
+        <div class="summary-title title-comp">변경 예상 스탯</div>
+        <div class="score-val score-comp" id="comp-score">0 <span id="diff-score" style="font-size:1.1rem;"></span></div>
+        <div class="stat-grid" id="comp-stats-container"></div>
+      </div>
+    </div>
+    <div class="equip-board" id="equip-container"></div>
+  </div>
 </div>
 
 <!-- 2번 탭: 데미지 계산기 -->
-
 <div id="tab-damage" class="tab-content">
-
-<div class="dev-notice">
-
-<h2>🚧 뚝딱뚝딱 개발중... 🚧</h2>
-
-<p>1번 탭에서 설정한 스탯을 바탕으로 데미지를 시뮬레이션 할 수 있는<br>최고의 데미지 계산기가 곧 찾아옵니다!</p>
-
-</div>
-
+  <div class="dev-notice">
+    <h2>🚧 뚝딱뚝딱 개발중... 🚧</h2>
+    <p>1번 탭에서 설정한 스탯을 바탕으로 데미지를 시뮬레이션 할 수 있는<br>최고의 데미지 계산기가 곧 찾아옵니다!</p>
+  </div>
 </div>
 
 <script>
-
 // 0. 탭 전환 로직
-
 function switchTab(event, tabId) {
-
-document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
-
-document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
-
-document.getElementById(tabId).classList.add('active');
-
-event.currentTarget.classList.add('active');
-
+  document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
+  document.getElementById(tabId).classList.add('active');
+  event.currentTarget.classList.add('active');
 }
 
 // 1. 공통 스탯 구조
-
 const baseStatsTemplate = {
-
-score: 0, atk: 0, atkPct: 0, def: 0, defPct: 0, br: 0, hp: 0, vp: 0,
-
-all: 0, str: 0, agi: 0, con: 0, intel: 0, trait: 0, exTrait: 0, skDmg: 0,
-
-exp: 0, tamerExp: 0, cardSlash: 0, eleDef: 0, eleAtk: 0
-
+  score: 0, atk: 0, atkPct: 0, def: 0, defPct: 0, br: 0, hp: 0, vp: 0,
+  all: 0, str: 0, agi: 0, con: 0, intel: 0, trait: 0, exTrait: 0, skDmg: 0,
+  exp: 0, tamerExp: 0, cardSlash: 0, eleDef: 0, eleAtk: 0
 };
 
 const statLabels = {
-
-atk: "공격력", atkPct: "공격력(%)", def: "방어력", defPct: "방어력(%)", br: "전투등급", hp: "HP", vp: "VP",
-
-all: "올스텟", str: "힘", agi: "민첩", con: "건강", intel: "지능",
-
-trait: "특성확률(%)", exTrait: "전용특성(%)", skDmg: "스킬증폭(%)",
-
-exp: "디지몬경험치(%)", tamerExp: "테이머경험치(%)", cardSlash: "카드슬래시", eleDef: "원소방어(%)", eleAtk: "원소공격(%)"
-
+  atk: "공격력", atkPct: "공격력(%)", def: "방어력", defPct: "방어력(%)", br: "전투등급", hp: "HP", vp: "VP",
+  all: "올스텟", str: "힘", agi: "민첩", con: "건강", intel: "지능",
+  trait: "특성확률(%)", exTrait: "전용특성(%)", skDmg: "스킬증폭(%)",
+  exp: "디지몬경험치(%)", tamerExp: "테이머경험치(%)", cardSlash: "카드슬래시", eleDef: "원소방어(%)", eleAtk: "원소공격(%)"
 };
-
 
 const gradeDisplayMap = {
-
-'s_plus': 'S+', 's': 'S', 's_minus': 'S-', 'a_plus': 'A+', 'a': 'A', 'a_minus': 'A-',
-
-'b_plus': 'B+', 'b': 'B', 'b_minus': 'B-', 'c_plus': 'C+', 'c': 'C', 'c_minus': 'C-',
-
-'d_plus': 'D+', 'd': 'D', 'd_minus': 'D-'
-
+  's_plus': 'S+', 's': 'S', 's_minus': 'S-', 'a_plus': 'A+', 'a': 'A', 'a_minus': 'A-',
+  'b_plus': 'B+', 'b': 'B', 'b_minus': 'B-', 'c_plus': 'C+', 'c': 'C', 'c_minus': 'C-',
+  'd_plus': 'D+', 'd': 'D', 'd_minus': 'D-'
 };
-
 const allGrades = Object.keys(gradeDisplayMap);
 
-// 2. 아이템 DB
-
+// 2. 아이템 DB 구성
 const itemDB = { "none": { name: "미장착", ...baseStatsTemplate } };
-
 itemDB["crest_beginner_magna"] = { name: "초심자의 매그너몬의 문장", ...baseStatsTemplate, score: 90, atk: 128, br: 240, def: 32 };
-
 itemDB["cap_beginner_miracle"] = { name: "초심자의 빛나는 기적의 캡슐", ...baseStatsTemplate, score: 240, atk: 20, all: 24, br: 120, trait: 4 };
-
 itemDB["cap_beginner_deepsea"] = { name: "초심자의 심해의 캡슐", ...baseStatsTemplate, score: 240, atk: 32, all: 32, br: 56, hp: 160 };
-
 itemDB["cap_beginner_pride"] = { name: "초심자의 긍지의 캡슐", ...baseStatsTemplate, score: 240, atk: 28, all: 24, br: 56, hp: 120 };
-
 itemDB["spirit_beginner_b_fire"] = { name: "초심자의 불완전한 불의 스피릿(B)", ...baseStatsTemplate, score: 80, str: 24 };
-
 itemDB["spirit_beginner_b_earth"] = { name: "초심자의 불완전한 땅의 스피릿(B)", ...baseStatsTemplate, score: 80, defPct: 2 };
-
 itemDB["spirit_beginner_b_water"] = { name: "초심자의 불완전한 물의 스피릿(B)", ...baseStatsTemplate, score: 80, trait: 1 };
-
 itemDB["dark_beginner_atk"] = { name: "초심자의 공격의 디아크", ...baseStatsTemplate, score: 100, atkPct: 1 };
-
+itemDB["dark_beginner_all"] = { name: "초심자의 디아크", ...baseStatsTemplate, score: 100, all: 5 };
 itemDB["crest_yonggi_10"] = { name: "용기의 문장+10", ...baseStatsTemplate, score: 100, atk: 150, def: 80, br: 650 };
-
 itemDB["crest_seongsil_10"] = { name: "성실의 문장+10", ...baseStatsTemplate, score: 100, def: 80, br: 650, hp: 550 };
-
 itemDB["crest_magna_1"] = { name: "매그너몬의 문장+1", ...baseStatsTemplate, score: 110, atk: 160, br: 300, def: 40 };
-
 itemDB["crest_magna_x"] = { name: "빛나는 매그너몬의 문장X", ...baseStatsTemplate, score: 200, atk: 180, br: 885, def: 110 };
 
 const alphaAtk = [0, 150, 155, 160, 170, 170, 180, 180, 190, 210, 230]; const alphaVp = [0, 415, 430, 445, 475, 505, 535, 565, 595, 655, 715];
-
 const omegaAtk = [0, 130, 135, 135, 145, 145, 155, 155, 165, 185, 205]; const omegaBr = [0, 410, 420, 430, 440, 460, 480, 500, 520, 560, 600]; const omegaHp = [0, 320, 340, 360, 380, 420, 460, 500, 540, 620, 700];
-
 const lordAtk = [0, 105, 110, 115, 125, 135, 145, 155, 165, 185, 205]; const lordBr = [0, 535, 570, 605, 675, 745, 815, 885, 955, 1095, 1235];
-
 const dynasDef = [0, 80, 83, 86, 92, 98, 104, 110, 116, 128, 140]; const dynasHp = [0, 435, 470, 505, 575, 645, 715, 785, 855, 995, 1135]; const dynasAtk = [0, 176, 182, 189, 202, 215, 228, 242, 255, 281, 308];
 
 for(let i=1; i<=10; i++) {
-
-itemDB[crest_alpha_${i}] = { name: 빛나는 알파몬의 문장+${i}, ...baseStatsTemplate, score: 100+i*10, atk: alphaAtk[i], vp: alphaVp[i] };
-
-itemDB[crest_omega_${i}] = { name: 빛나는 오메가몬의 문장+${i}, ...baseStatsTemplate, score: 100+i*10, atk: omegaAtk[i], br: omegaBr[i], hp: omegaHp[i] };
-
-itemDB[crest_lord_${i}] = { name: 빛나는 로드나이트몬의 문장+${i}, ...baseStatsTemplate, score: 100+i*10, atk: lordAtk[i], br: lordBr[i] };
-
-itemDB[crest_dynas_${i}] = { name: 빛나는 듀나스몬의 문장+${i}, ...baseStatsTemplate, score: 100+i*10, def: dynasDef[i], hp: dynasHp[i], atk: dynasAtk[i] };
-
+  itemDB[`crest_alpha_${i}`] = { name: `빛나는 알파몬의 문장+${i}`, ...baseStatsTemplate, score: 100+i*10, atk: alphaAtk[i], vp: alphaVp[i] };
+  itemDB[`crest_omega_${i}`] = { name: `빛나는 오메가몬의 문장+${i}`, ...baseStatsTemplate, score: 100+i*10, atk: omegaAtk[i], br: omegaBr[i], hp: omegaHp[i] };
+  itemDB[`crest_lord_${i}`] = { name: `빛나는 로드나이트몬의 문장+${i}`, ...baseStatsTemplate, score: 100+i*10, atk: lordAtk[i], br: lordBr[i] };
+  itemDB[`crest_dynas_${i}`] = { name: `빛나는 듀나스몬의 문장+${i}`, ...baseStatsTemplate, score: 100+i*10, def: dynasDef[i], hp: dynasHp[i], atk: dynasAtk[i] };
 }
 
 const yggCrests = [
-
-{id:'d_minus', atk:180, def:110, br:885, hp:785, vp:565, sc:200}, {id:'d', atk:190, def:116, br:955, hp:785, vp:565, sc:210}, {id:'d_plus', atk:190, def:116, br:955, hp:1855, vp:595, sc:220},
-
-{id:'c_minus', atk:200, def:122, br:1025, hp:925, vp:625, sc:230}, {id:'c', atk:210, def:128, br:1095, hp:925, vp:625, sc:240}, {id:'c_plus', atk:210, def:128, br:1095, hp:955, vp:655, sc:250},
-
-{id:'b_minus', atk:220, def:134, br:1165, hp:1065, vp:685, sc:260}, {id:'b', atk:230, def:140, br:1235, hp:1065, vp:685, sc:270}, {id:'b_plus', atk:230, def:140, br:1235, hp:1135, vp:715, sc:280},
-
-{id:'a_minus', atk:240, def:146, br:1305, hp:1205, vp:745, sc:290}, {id:'a', atk:250, def:152, br:1375, hp:1205, vp:745, sc:295}, {id:'a_plus', atk:250, def:152, br:1375, hp:1275, vp:775, sc:299},
-
-{id:'s_minus', atk:260, def:158, br:1445, hp:1345, vp:805, sc:300}, {id:'s', atk:270, def:164, br:1515, hp:1345, vp:805, sc:300}, {id:'s_plus', atk:270, def:164, br:1515, hp:1415, vp:835, sc:300}
-
+  {id:'d_minus', atk:180, def:110, br:885, hp:785, vp:565, sc:200}, {id:'d', atk:190, def:116, br:955, hp:785, vp:565, sc:210}, {id:'d_plus', atk:190, def:116, br:955, hp:1855, vp:595, sc:220},
+  {id:'c_minus', atk:200, def:122, br:1025, hp:925, vp:625, sc:230}, {id:'c', atk:210, def:128, br:1095, hp:925, vp:625, sc:240}, {id:'c_plus', atk:210, def:128, br:1095, hp:955, vp:655, sc:250},
+  {id:'b_minus', atk:220, def:134, br:1165, hp:1065, vp:685, sc:260}, {id:'b', atk:230, def:140, br:1235, hp:1065, vp:685, sc:270}, {id:'b_plus', atk:230, def:140, br:1235, hp:1135, vp:715, sc:280},
+  {id:'a_minus', atk:240, def:146, br:1305, hp:1205, vp:745, sc:290}, {id:'a', atk:250, def:152, br:1375, hp:1205, vp:745, sc:295}, {id:'a_plus', atk:250, def:152, br:1375, hp:1275, vp:775, sc:299},
+  {id:'s_minus', atk:260, def:158, br:1445, hp:1345, vp:805, sc:300}, {id:'s', atk:270, def:164, br:1515, hp:1345, vp:805, sc:300}, {id:'s_plus', atk:270, def:164, br:1515, hp:1415, vp:835, sc:300}
 ];
-
-yggCrests.forEach(c => { itemDB[crest_ygg_${c.id}] = { name: 이그드라실의 문장 ${gradeDisplayMap[c.id]}, ...baseStatsTemplate, score: c.sc, atk: c.atk, def: c.def, br: c.br, hp: c.hp, vp: c.vp }; });
+yggCrests.forEach(c => { itemDB[`crest_ygg_${c.id}`] = { name: `이그드라실의 문장 ${gradeDisplayMap[c.id]}`, ...baseStatsTemplate, score: c.sc, atk: c.atk, def: c.def, br: c.br, hp: c.hp, vp: c.vp }; });
 
 itemDB["cap_red_v"] = { name: "레드 백신 캡슐", ...baseStatsTemplate, score: 150, all: 30, atk: 30 };
-
 itemDB["cap_red_d"] = { name: "레드 데이터 캡슐", ...baseStatsTemplate, score: 150, all: 30, atk: 30 };
-
 itemDB["cap_red_vi"] = { name: "레드 바이러스 캡슐", ...baseStatsTemplate, score: 150, all: 30, atk: 30 };
-
 itemDB["cap_shining_miracle"] = { name: "빛나는 기적의 캡슐", ...baseStatsTemplate, score: 300, all: 30, atk: 25, br: 150, trait: 5 };
-
 itemDB["cap_deepsea"] = { name: "심해의 캡슐", ...baseStatsTemplate, score: 300, all: 48, atk: 48, hp: 240, br: 84 };
-
 itemDB["cap_pride"] = { name: "긍지의 캡슐", ...baseStatsTemplate, score: 300, all: 36, atk: 42, hp: 180, br: 84 };
-
 itemDB["cap_metal"] = { name: "메탈 캡슐", ...baseStatsTemplate, score: 350, all: 60, atk: 50, br: 300, trait: 10 };
-
 itemDB["cap_shining_metal"] = { name: "빛나는 메탈 캡슐", ...baseStatsTemplate, score: 400, all: 72, atk: 60, br: 360, trait: 12 };
-
 itemDB["cap_dark"] = { name: "암흑 캡슐", ...baseStatsTemplate, score: 350, all: 55, atk: 65, hp: 270, br: 125 };
-
 itemDB["cap_black_dark"] = { name: "칠흑빛 암흑 캡슐", ...baseStatsTemplate, score: 400, all: 66, atk: 78, hp: 324, br: 150 };
-
 itemDB["cap_abyss"] = { name: "심연의 캡슐", ...baseStatsTemplate, score: 350, all: 85, atk: 60, hp: 420, br: 105 };
-
 itemDB["cap_hollow_abyss"] = { name: "공허한 심연의 캡슐", ...baseStatsTemplate, score: 400, all: 102, atk: 72, hp: 504, br: 126 };
 
 itemDB["acc_beginner_ygg_ear"] = { name: "초심자의 화려한 이그드라실 귀걸이", ...baseStatsTemplate, score: 160, atk: 24 };
-
 itemDB["acc_beginner_ygg_neck"] = { name: "초심자의 화려한 이그드라실 목걸이", ...baseStatsTemplate, score: 160, def: 32 };
-
 itemDB["acc_beginner_ygg_ring"] = { name: "초심자의 화려한 이그드라실 반지", ...baseStatsTemplate, score: 160, all: 24, hp: 240 };
-
 itemDB["acc_ygg_soft_ear"] = { name: "은은한 이그드라실 귀걸이", ...baseStatsTemplate, score: 150, atk: 20, set: "ygg_soft" };
-
 itemDB["acc_ygg_soft_neck"] = { name: "은은한 이그드라실 목걸이", ...baseStatsTemplate, score: 150, def: 20, set: "ygg_soft" };
-
 itemDB["acc_ygg_soft_ring"] = { name: "은은한 이그드라실 반지", ...baseStatsTemplate, score: 150, all: 15, hp: 100, set: "ygg_soft" };
-
 itemDB["acc_ygg_bright_ear"] = { name: "화려한 이그드라실 귀걸이", ...baseStatsTemplate, score: 200, atk: 30, set: "ygg_bright" };
-
 itemDB["acc_ygg_bright_neck"] = { name: "화려한 이그드라실 목걸이", ...baseStatsTemplate, score: 200, def: 40, set: "ygg_bright" };
-
 itemDB["acc_ygg_bright_ring"] = { name: "화려한 이그드라실 반지", ...baseStatsTemplate, score: 200, all: 30, hp: 300, set: "ygg_bright" };
-
 itemDB["acc_obsidian_ear"] = { name: "옵시디언디지조이드 귀걸이", ...baseStatsTemplate, score: 400, atk: 60, vp: 300, set: "obsidian" };
-
 itemDB["acc_choi_neck"] = { name: "최영재의 목걸이", ...baseStatsTemplate, score: 400, def: 100, br: 300, set: "obsidian" };
-
 itemDB["acc_nibel_ring"] = { name: "니벨룽겐의 반지", ...baseStatsTemplate, score: 400, all: 35, hp: 500, set: "obsidian" };
-
 itemDB["acc_spider_ear"] = { name: "거미 여왕의 귀걸이", ...baseStatsTemplate, score: 450, atk: 90, vp: 450, set: "spider" };
-
 itemDB["acc_gold_neck"] = { name: "황금 장군의 목걸이", ...baseStatsTemplate, score: 450, def: 150, br: 450, set: "spider" };
-
 itemDB["acc_forest_ring"] = { name: "깊은 숲 악마의 반지", ...baseStatsTemplate, score: 450, all: 50, hp: 750, set: "spider" };
-
 itemDB["acc_shining_spider_ear"] = { name: "빛나는 거미 여왕의 귀걸이", ...baseStatsTemplate, score: 500, atk: 108, vp: 540, set: "shining_spider" };
-
 itemDB["acc_shining_gold_neck"] = { name: "빛나는황금 장군의 목걸이", ...baseStatsTemplate, score: 500, def: 180, br: 540, set: "shining_spider" };
-
 itemDB["acc_shining_forest_ring"] = { name: "빛나는 깊은 숲 악마의 반지", ...baseStatsTemplate, score: 500, all: 60, hp: 900, set: "shining_spider" };
 
 const accessorySetEffects = {
-
-"ygg_soft": { atk: 20, hp: 150, vp: 200, br: 150 }, "ygg_bright": { atk: 20, def: 40, hp: 150, vp: 250, br: 200 },
-
-"obsidian": { atk: 40, hp: 100, br: 50, all: 20 }, "spider": { atk: 80, hp: 200, br: 100, all: 40 }, "shining_spider": { atk: 80, hp: 200, br: 100, all: 40 }
-
+  "ygg_soft": { atk: 20, hp: 150, vp: 200, br: 150 }, "ygg_bright": { atk: 20, def: 40, hp: 150, vp: 250, br: 200 },
+  "obsidian": { atk: 40, hp: 100, br: 50, all: 20 }, "spider": { atk: 80, hp: 200, br: 100, all: 40 }, "shining_spider": { atk: 80, hp: 200, br: 100, all: 40 }
 };
 
 const holyBeasts = [ { id:'hyun', n:'현무몬의 보옥', stat:'con' }, { id:'baek', n:'백호몬의 보옥', stat:'agi' }, { id:'ju', n:'주작몬의 보옥', stat:'str' }, { id:'cheong', n:'청룡몬의 보옥', stat:'intel' } ];
-
 const hSkDmg = [0, 1, 2, 3, 4, 5, 6, 8, 11, 15, 20];
-
 holyBeasts.forEach(b => {
-
-for(let i=1; i<=10; i++) itemDB[crystal_${b.id}_${i}] = { name: ${b.n}+${i}, ...baseStatsTemplate, score: i*50, [b.stat]: i*20, skDmg: hSkDmg[i] };
-
+  for(let i=1; i<=10; i++) itemDB[`crystal_${b.id}_${i}`] = { name: `${b.n}+${i}`, ...baseStatsTemplate, score: i*50, [b.stat]: i*20, skDmg: hSkDmg[i] };
 });
 
 itemDB["crystal_gumbi"] = { name: "굼비라몬의 보옥", ...baseStatsTemplate, score: 50, con: 20 };
-
 itemDB["crystal_bigara"] = { name: "비가라몬의 보옥", ...baseStatsTemplate, score: 50, skDmg: 2 };
-
 itemDB["crystal_baji"] = { name: "바지라몬의 보옥", ...baseStatsTemplate, score: 50, con: 10, skDmg: 1 };
-
 itemDB["crystal_sindra"] = { name: "신드라몬의 보옥", ...baseStatsTemplate, score: 50, agi: 20 };
-
 itemDB["crystal_magura"] = { name: "마구라몬의 보옥", ...baseStatsTemplate, score: 50, agi: 10, skDmg: 1 };
-
 itemDB["crystal_kadura"] = { name: "카두라몬의 보옥", ...baseStatsTemplate, score: 50, skDmg: 2 };
-
 itemDB["crystal_pajira"] = { name: "파지라몬의 보옥", ...baseStatsTemplate, score: 50, str: 20 };
-
 itemDB["crystal_santira"] = { name: "산티라몬의 보옥", ...baseStatsTemplate, score: 50, str: 10, skDmg: 1 };
-
 itemDB["crystal_indira"] = { name: "인디라몬의 보옥", ...baseStatsTemplate, score: 50, skDmg: 2 };
-
 itemDB["crystal_mihira"] = { name: "미히라몬의 보옥", ...baseStatsTemplate, score: 50, intel: 20 };
-
 itemDB["crystal_antira"] = { name: "안티라몬의 보옥", ...baseStatsTemplate, score: 50, intel: 10, skDmg: 1 };
-
 itemDB["crystal_manira"] = { name: "마니라몬의 보옥", ...baseStatsTemplate, score: 50, skDmg: 2 };
-
 itemDB["crystal_donggle"] = { name: "동글몬의 보옥", ...baseStatsTemplate, score: 200, skDmg: 5, trait: 5 };
 
-// 스피릿
-
+// 스피릿 기본/불완전 세팅 루프
 const spiritElements = [
-
-{ id: 'fire', kr: '불', h: {atk: 50}, b: {str: 60} }, { id: 'water', kr: '물', h: {intel: 60}, b: {trait: 4} },
-
-{ id: 'wind', kr: '바람', h: {br: 200}, b: {agi: 60} }, { id: 'earth', kr: '땅', h: {hp: 800}, b: {defPct: 6} },
-
-{ id: 'wood', kr: '나무', h: {agi: 30, intel: 30}, b: {str: 30, con: 30} }, { id: 'ice', kr: '얼음', h: {vp: 400}, b: {con: 60} },
-
-{ id: 'light', kr: '빛', h: {tamerExp: 10}, b: {exp: 50} }, { id: 'dark', kr: '어둠', h: {cardSlash: 12}, b: {exTrait: 2} },
-
-{ id: 'thunder', kr: '번개', h: {all: 30}, b: {atk: 30, defPct: 4} }, { id: 'steel', kr: '강철', h: {eleDef: 6}, b: {eleAtk: 6} }
-
+  { id: 'fire', kr: '불', h: {atk: 50}, b: {str: 60} }, { id: 'water', kr: '물', h: {intel: 60}, b: {trait: 4} },
+  { id: 'wind', kr: '바람', h: {br: 200}, b: {agi: 60} }, { id: 'earth', kr: '땅', h: {hp: 800}, b: {defPct: 6} },
+  { id: 'wood', kr: '나무', h: {agi: 30, intel: 30}, b: {str: 30, con: 30} }, { id: 'ice', kr: '얼음', h: {vp: 400}, b: {con: 60} },
+  { id: 'light', kr: '빛', h: {tamerExp: 10}, b: {exp: 50} }, { id: 'dark', kr: '어둠', h: {cardSlash: 12}, b: {exTrait: 2} },
+  { id: 'thunder', kr: '번개', h: {all: 30}, b: {atk: 30, defPct: 4} }, { id: 'steel', kr: '강철', h: {eleDef: 6}, b: {eleAtk: 6} }
 ];
 
 spiritElements.forEach(el => {
-
-itemDB[spirit_${el.id}_com_h] = { name: 완전한 ${el.kr}의 스피릿(H), ...baseStatsTemplate, score: 200, ...el.h };
-
-itemDB[spirit_${el.id}_com_b] = { name: 완전한 ${el.kr}의 스피릿(B), ...baseStatsTemplate, score: 200, ...el.b };
-
-let inc_h = {}; for(let k in el.h) inc_h[k] = el.h[k] / 2;
-
-let inc_b = {}; for(let k in el.b) inc_b[k] = el.b[k] / 2;
-
-itemDB[spirit_${el.id}_inc_h] = { name: 불완전한 ${el.kr}의 스피릿(H), ...baseStatsTemplate, score: 100, ...inc_h };
-
-itemDB[spirit_${el.id}_inc_b] = { name: 불완전한 ${el.kr}의 스피릿(B), ...baseStatsTemplate, score: 100, ...inc_b };
-
+  itemDB[`spirit_${el.id}_com_h`] = { name: `완전한 ${el.kr}의 스피릿(H)`, ...baseStatsTemplate, score: 200, ...el.h };
+  itemDB[`spirit_${el.id}_com_b`] = { name: `완전한 ${el.kr}의 스피릿(B)`, ...baseStatsTemplate, score: 200, ...el.b };
+  let inc_h = {}; for(let k in el.h) inc_h[k] = el.h[k] / 2;
+  let inc_b = {}; for(let k in el.b) inc_b[k] = el.b[k] / 2;
+  itemDB[`spirit_${el.id}_inc_h`] = { name: `불완전한 ${el.kr}의 스피릿(H)`, ...baseStatsTemplate, score: 100, ...inc_h };
+  itemDB[`spirit_${el.id}_inc_b`] = { name: `불완전한 ${el.kr}의 스피릿(B)`, ...baseStatsTemplate, score: 100, ...inc_b };
 });
 
 const doubleData = {
-
-'fire': { atk: [25,25,50,75,75], str: [30,60,60,60,90] }, 'wind': { br: [100,100,200,300,300], agi: [30,60,60,60,90] },
-
-'ice': { vp: [200,200,400,600,600], con: [30,60,60,60,90] }, 'earth': { hp: [400,400,800,1200,1200], defPct: [3,6,6,6,9] },
-
-'wood': { agi: [20,20,40,60,60], intel: [20,20,40,60,60], str: [20,40,40,40,60], con: [20,40,40,40,60] },
-
-'light': { tamerExp: [5,5,10,15,15], exp: [25,50,50,50,75] }, 'thunder': { all: [15,15,30,45,45], atk: [15,30,30,30,45], defPct: [2,4,4,4,6] },
-
-'dark': { cardSlash: [6,6,12,18,18], exTrait: [1,2,2,2,3] }, 'water': { intel: [30,30,60,90,90], trait: [2,4,4,4,6] }, 'steel': { eleDef: [3,3,6,9,9], eleAtk: [3,6,6,6,9] }
-
+  'fire': { atk: [25,25,50,75,75], str: [30,60,60,60,90] }, 'wind': { br: [100,100,200,300,300], agi: [30,60,60,60,90] },
+  'ice': { vp: [200,200,400,600,600], con: [30,60,60,60,90] }, 'earth': { hp: [400,400,800,1200,1200], defPct: [3,6,6,6,9] },
+  'wood': { agi: [20,20,40,60,60], intel: [20,20,40,60,60], str: [20,40,40,40,60], con: [20,40,40,40,60] },
+  'light': { tamerExp: [5,5,10,15,15], exp: [25,50,50,50,75] }, 'thunder': { all: [15,15,30,45,45], atk: [15,30,30,30,45], defPct: [2,4,4,4,6] },
+  'dark': { cardSlash: [6,6,12,18,18], exTrait: [1,2,2,2,3] }, 'water': { intel: [30,30,60,90,90], trait: [2,4,4,4,6] }, 'steel': { eleDef: [3,3,6,9,9], eleAtk: [3,6,6,6,9] }
 };
 
+// [추가] 더블 스피릿 다이내믹 루프 처리 파트
 const doubleGrades = ['최하급', '하급', '중급', '상급', '최상급'];
-
 spiritElements.forEach(el => {
-
-doubleGrades.forEach((g, idx) => {
-
-let stats = {}; for(let k in doubleData[el.id]) stats[k] = doubleData[el.id][k][idx];
-
-itemDB[spirit_${el.id}_dbl_${idx}] = { name: ${g} 더블 스피릿(${el.kr}), ...baseStatsTemplate, score: 200 + idx*25, ...stats };
-
+  doubleGrades.forEach((g, idx) => {
+    let stats = {}; for(let k in doubleData[el.id]) stats[k] = doubleData[el.id][k][idx];
+    itemDB[`spirit_${el.id}_dbl_${idx}`] = { name: `${g} 더블 스피릿(${el.kr})`, ...baseStatsTemplate, score: 200 + idx*25, ...stats };
+  });
 });
 
-});
-
-// 디아크 (4단 마왕의 디아크 DB 추가)
-
+// [추가] 디아크 (4단 마왕의 디아크 DB 추가)
 const dark4danData = [
-
-{ id: 's_plus', atkPct: 7, trait: 7, exp: 140, br: 700, sc: 500 },
-
-{ id: 's', atkPct: 7, trait: 7, exp: 140, br: 600, sc: 500 },
-
-{ id: 's_minus', atkPct: 7, trait: 7, exp: 120, br: 600, sc: 500 },
-
-{ id: 'a_plus', atkPct: 6, trait: 6, exp: 120, br: 600, sc: 450 },
-
-{ id: 'a', atkPct: 6, trait: 6, exp: 120, br: 500, sc: 450 },
-
-{ id: 'a_minus', atkPct: 6, trait: 6, exp: 100, br: 500, sc: 450 },
-
-{ id: 'b_plus', atkPct: 5, trait: 5, exp: 100, br: 500, sc: 400 },
-
-{ id: 'b', atkPct: 5, trait: 5, exp: 100, br: 400, sc: 400 },
-
-{ id: 'b_minus', atkPct: 5, trait: 5, exp: 80, br: 400, sc: 400 },
-
-{ id: 'c_plus', atkPct: 4, trait: 4, exp: 80, br: 400, sc: 375 },
-
-{ id: 'c', atkPct: 4, trait: 4, exp: 80, br: 300, sc: 375 },
-
-{ id: 'c_minus', atkPct: 4, trait: 4, exp: 60, br: 300, sc: 375 },
-
-{ id: 'd_plus', atkPct: 3, trait: 3, exp: 60, br: 300, sc: 350 },
-
-{ id: 'd', atkPct: 3, trait: 3, exp: 60, br: 200, sc: 350 },
-
-{ id: 'd_minus', atkPct: 3, trait: 3, exp: 40, br: 200, sc: 350 }
-
+  { id: 's_plus', atkPct: 7, trait: 7, exp: 140, br: 700, sc: 500 },
+  { id: 's', atkPct: 7, trait: 7, exp: 140, br: 600, sc: 500 },
+  { id: 's_minus', atkPct: 7, trait: 7, exp: 120, br: 600, sc: 500 },
+  { id: 'a_plus', atkPct: 6, trait: 6, exp: 120, br: 600, sc: 450 },
+  { id: 'a', atkPct: 6, trait: 6, exp: 120, br: 500, sc: 450 },
+  { id: 'a_minus', atkPct: 6, trait: 6, exp: 100, br: 500, sc: 450 },
+  { id: 'b_plus', atkPct: 5, trait: 5, exp: 100, br: 500, sc: 400 },
+  { id: 'b', atkPct: 5, trait: 5, exp: 100, br: 400, sc: 400 },
+  { id: 'b_minus', atkPct: 5, trait: 5, exp: 80, br: 400, sc: 400 },
+  { id: 'c_plus', atkPct: 4, trait: 4, exp: 80, br: 400, sc: 375 },
+  { id: 'c', atkPct: 4, trait: 4, exp: 80, br: 300, sc: 375 },
+  { id: 'c_minus', atkPct: 4, trait: 4, exp: 60, br: 300, sc: 375 },
+  { id: 'd_plus', atkPct: 3, trait: 3, exp: 60, br: 300, sc: 350 },
+  { id: 'd', atkPct: 3, trait: 3, exp: 60, br: 200, sc: 350 },
+  { id: 'd_minus', atkPct: 3, trait: 3, exp: 40, br: 200, sc: 350 }
 ];
-
 dark4danData.forEach(d => {
-
-itemDB[dark_4dan_${d.id}] = {
-
-name: 4단 마왕의 디아크 ${gradeDisplayMap[d.id]}, ...baseStatsTemplate,
-
-score: d.sc, atkPct: d.atkPct, trait: d.trait, exp: d.exp, br: d.br, cardSlash: 33
-
-};
-
+  itemDB[`dark_4dan_${d.id}`] = {
+    name: `4단 마왕의 디아크 ${gradeDisplayMap[d.id]}`, ...baseStatsTemplate,
+    score: d.sc, atkPct: d.atkPct, trait: d.trait, exp: d.exp, br: d.br, cardSlash: 33
+  };
 });
 
-// 3단 마왕의 디아크 DB
-
+// [추가] 3단 마왕의 디아크 DB
 const dark3danData = [
-
-{ id: 's_plus', atkPct: 7, trait: 7, exp: 140, sc: 400 }, { id: 's', atkPct: 7, trait: 7, exp: 120, sc: 390 }, { id: 's_minus', atkPct: 7, trait: 6, exp: 120, sc: 380 },
-
-{ id: 'a_plus', atkPct: 6, trait: 6, exp: 120, sc: 370 }, { id: 'a', atkPct: 6, trait: 6, exp: 100, sc: 360 }, { id: 'a_minus', atkPct: 6, trait: 5, exp: 100, sc: 350 },
-
-{ id: 'b_plus', atkPct: 5, trait: 5, exp: 100, sc: 340 }, { id: 'b', atkPct: 5, trait: 5, exp: 80, sc: 330 }, { id: 'b_minus', atkPct: 5, trait: 4, exp: 80, sc: 320 },
-
-{ id: 'c_plus', atkPct: 4, trait: 4, exp: 80, sc: 310 }, { id: 'c', atkPct: 4, trait: 4, exp: 60, sc: 300 }, { id: 'c_minus', atkPct: 4, trait: 3, exp: 60, sc: 290 },
-
-{ id: 'd_plus', atkPct: 3, trait: 3, exp: 60, sc: 280 }, { id: 'd', atkPct: 3, trait: 3, exp: 40, sc: 270 }, { id: 'd_minus', atkPct: 3, trait: 2, exp: 40, sc: 260 }
-
+  { id: 's_plus', atkPct: 7, trait: 7, exp: 140, sc: 400 }, { id: 's', atkPct: 7, trait: 7, exp: 120, sc: 390 }, { id: 's_minus', atkPct: 7, trait: 6, exp: 120, sc: 380 },
+  { id: 'a_plus', atkPct: 6, trait: 6, exp: 120, sc: 370 }, { id: 'a', atkPct: 6, trait: 6, exp: 100, sc: 360 }, { id: 'a_minus', atkPct: 6, trait: 5, exp: 100, sc: 350 },
+  { id: 'b_plus', atkPct: 5, trait: 5, exp: 100, sc: 340 }, { id: 'b', atkPct: 5, trait: 5, exp: 80, sc: 330 }, { id: 'b_minus', atkPct: 5, trait: 4, exp: 80, sc: 320 },
+  { id: 'c_plus', atkPct: 4, trait: 4, exp: 80, sc: 310 }, { id: 'c', atkPct: 4, trait: 4, exp: 60, sc: 300 }, { id: 'c_minus', atkPct: 4, trait: 3, exp: 60, sc: 290 },
+  { id: 'd_plus', atkPct: 3, trait: 3, exp: 60, sc: 280 }, { id: 'd', atkPct: 3, trait: 3, exp: 40, sc: 270 }, { id: 'd_minus', atkPct: 3, trait: 2, exp: 40, sc: 260 }
 ];
-
-dark3danData.forEach(d => { itemDB[dark_3dan_${d.id}] = { name: 3단 마왕의 디아크 ${gradeDisplayMap[d.id]}, ...baseStatsTemplate, score: d.sc, atkPct: d.atkPct, trait: d.trait, exp: d.exp }; });
+dark3danData.forEach(d => { itemDB[`dark_3dan_${d.id}`] = { name: `3단 마왕의 디아크 ${gradeDisplayMap[d.id]}`, ...baseStatsTemplate, score: d.sc, atkPct: d.atkPct, trait: d.trait, exp: d.exp }; });
 
 itemDB["dark_tamjil_c"] = { name: "(탐질)하급 마왕의 디아크", ...baseStatsTemplate, score: 150, atkPct: 5, trait: 1 };
-
 itemDB["dark_tamjil_b"] = { name: "(탐질)중급 마왕의 디아크", ...baseStatsTemplate, score: 200, atkPct: 5, trait: 2 };
-
 itemDB["dark_tamjil_a"] = { name: "(탐질)상급 마왕의 디아크", ...baseStatsTemplate, score: 300, atkPct: 5, trait: 3 };
-
 itemDB["dark_jiltam_c"] = { name: "(질탐)하급 마왕의 디아크", ...baseStatsTemplate, score: 150, atkPct: 1, trait: 5 };
-
 itemDB["dark_jiltam_b"] = { name: "(질탐)중급 마왕의 디아크", ...baseStatsTemplate, score: 200, atkPct: 2, trait: 5 };
-
 itemDB["dark_jiltam_a"] = { name: "(질탐)상급 마왕의 디아크", ...baseStatsTemplate, score: 300, atkPct: 3, trait: 5 };
 
-// 3. UI용 장비 목록
-
+// 3. UI용 장비 카탈로그 명세 정의 (grades 속성 보완)
 const uiCatalog = {
-
-crest: [
-
-{ id: "none", name: "미장착", type: "fixed" }, { id: "crest_beginner_magna", name: "초심자의 매그너몬의 문장", type: "fixed" },
-
-{ id: "crest_yonggi_10", name: "용기의 문장 (+10)", type: "fixed" }, { id: "crest_seongsil_10", name: "성실의 문장 (+10)", type: "fixed" },
-
-{ id: "crest_alpha", name: "빛나는 알파몬의 문장", type: "plus" }, { id: "crest_omega", name: "빛나는 오메가몬의 문장", type: "plus" },
-
-{ id: "crest_lord", name: "빛나는 로드나이트몬의 문장", type: "plus" }, { id: "crest_dynas", name: "빛나는 듀나스몬의 문장", type: "plus" },
-
-{ id: "crest_magna_1", name: "매그너몬의 문장 (+1)", type: "fixed" }, { id: "crest_magna_x", name: "빛나는 매그너몬의 문장X", type: "fixed" },
-
-{ id: "crest_ygg", name: "이그드라실의 문장", type: "grade" }
-
-],
-
-capsule: [
-
-{ id: "none", name: "미장착", type: "fixed" }, { id: "cap_beginner_miracle", name: "초심자의 빛나는 기적의 캡슐", type: "fixed" },
-
-{ id: "cap_beginner_deepsea", name: "초심자의 심해의 캡슐", type: "fixed" }, { id: "cap_beginner_pride", name: "초심자의 긍지의 캡슐", type: "fixed" },
-
-{ id: "cap_red_v", name: "레드 백신 캡슐", type: "fixed" }, { id: "cap_red_d", name: "레드 데이터 캡슐", type: "fixed" }, { id: "cap_red_vi", name: "레드 바이러스 캡슐", type: "fixed" },
-
-{ id: "cap_shining_miracle", name: "빛나는 기적의 캡슐", type: "fixed" }, { id: "cap_deepsea", name: "심해의 캡슐", type: "fixed" }, { id: "cap_pride", name: "긍지의 캡슐", type: "fixed" },
-
-{ id: "cap_metal", name: "메탈 캡슐", type: "fixed" }, { id: "cap_shining_metal", name: "빛나는 메탈 캡슐", type: "fixed" }, { id: "cap_dark", name: "암흑 캡슐", type: "fixed" },
-
-{ id: "cap_black_dark", name: "칠흑빛 암흑 캡슐", type: "fixed" }, { id: "cap_abyss", name: "심연의 캡슐", type: "fixed" }, { id: "cap_hollow_abyss", name: "공허한 심연의 캡슐", type: "fixed" }
-
-],
-
-earring: [
-
-{ id: "none", name: "미장착", type: "fixed" }, { id: "acc_beginner_ygg_ear", name: "초심자의 화려한 이그드라실", type: "fixed" },
-
-{ id: "acc_ygg_soft_ear", name: "은은한 이그드라실", type: "fixed" }, { id: "acc_ygg_bright_ear", name: "화려한 이그드라실", type: "fixed" },
-
-{ id: "acc_obsidian_ear", name: "옵시디언디지조이드", type: "fixed" }, { id: "acc_spider_ear", name: "거미 여왕", type: "fixed" }, { id: "acc_shining_spider_ear", name: "빛나는 거미 여왕", type: "fixed" }
-
-],
-
-necklace: [
-
-{ id: "none", name: "미장착", type: "fixed" }, { id: "acc_beginner_ygg_neck", name: "초심자의 화려한 이그드라실", type: "fixed" },
-
-{ id: "acc_ygg_soft_neck", name: "은은한 이그드라실", type: "fixed" }, { id: "acc_ygg_bright_neck", name: "화려한 이그드라실", type: "fixed" },
-
-{ id: "acc_choi_neck", name: "최영재의 목걸이", type: "fixed" }, { id: "acc_gold_neck", name: "황금 장군", type: "fixed" }, { id: "acc_shining_gold_neck", name: "빛나는 황금 장군", type: "fixed" }
-
-],
-
-ring: [
-
-{ id: "none", name: "미장착", type: "fixed" }, { id: "acc_beginner_ygg_ring", name: "초심자의 화려한 이그드라실", type: "fixed" },
-
-{ id: "acc_ygg_soft_ring", name: "은은한 이그드라실", type: "fixed" }, { id: "acc_ygg_bright_ring", name: "화려한 이그드라실", type: "fixed" },
-
-{ id: "acc_nibel_ring", name: "니벨룽겐의 반지", type: "fixed" }, { id: "acc_forest_ring", name: "깊은 숲 악마", type: "fixed" }, { id: "acc_shining_forest_ring", name: "빛나는 깊은 숲 악마", type: "fixed" }
-
-],
-
-spirit: [
-
-{ id: "none", name: "미장착", type: "fixed" },
-
-{ id: "spirit_beginner_b_fire", name: "초심자의 불완전한 불의 스피릿(B)", type: "fixed" },
-
-{ id: "spirit_beginner_b_earth", name: "초심자의 불완전한 땅의 스피릿(B)", type: "fixed" },
-
-{ id: "spirit_beginner_b_water", name: "초심자의 불완전한 물의 스피릿(B)", type: "fixed" },
-
-{ id: "spirit_fire", name: "🔥 불의 스피릿", type: "spirit_mod" }, { id: "spirit_water", name: "💧 물의 스피릿", type: "spirit_mod" },
-
-{ id: "spirit_wind", name: "🌪️ 바람의 스피릿", type: "spirit_mod" }, { id: "spirit_earth", name: "🪨 땅의 스피릿", type: "spirit_mod" },
-
-{ id: "spirit_wood", name: "🌿 나무의 스피릿", type: "spirit_mod" }, { id: "spirit_ice", name: "❄️ 얼음의 스피릿", type: "spirit_mod" },
-
-{ id: "spirit_light", name: "✨ 빛의 스피릿", type: "spirit_mod" }, { id: "spirit_dark", name: "🌑 어둠의 스피릿", type: "spirit_mod" },
-
-{ id: "spirit_thunder", name: "⚡ 번개의 스피릿", type: "spirit_mod" }, { id: "spirit_steel", name: "⚙️ 강철의 스피릿", type: "spirit_mod" }
-
-],
-
-crystal: [
-
-{ id: "none", name: "미장착", type: "fixed" },
-
-{ id: "crystal_hyun", name: "현무몬의 보옥", type: "plus" }, { id: "crystal_baek", name: "백호몬의 보옥", type: "plus" },
-
-{ id: "crystal_ju", name: "주작몬의 보옥", type: "plus" }, { id: "crystal_cheong", name: "청룡몬의 보옥", type: "plus" },
-
-{ id: "crystal_gumbi", name: "굼비라몬", type: "fixed" }, { id: "crystal_bigara", name: "비가라몬", type: "fixed" },
-
-{ id: "crystal_baji", name: "바지라몬", type: "fixed" }, { id: "crystal_sindra", name: "신드라몬", type: "fixed" },
-
-{ id: "crystal_magura", name: "마구라몬", type: "fixed" }, { id: "crystal_kadura", name: "카두라몬", type: "fixed" },
-
-{ id: "crystal_pajira", name: "파지라몬", type: "fixed" }, { id: "crystal_santira", name: "산티라몬", type: "fixed" },
-
-{ id: "crystal_indira", name: "인디라몬", type: "fixed" }, { id: "crystal_mihira", name: "미히라몬", type: "fixed" },
-
-{ id: "crystal_antira", name: "안티라몬", type: "fixed" }, { id: "crystal_manira", name: "마니라몬", type: "fixed" },
-
-{ id: "crystal_donggle", name: "동글몬의 보옥", type: "fixed" }
-
-],
-
-dark: [
-
-{ id: "none", name: "미장착", type: "fixed" }, { id: "dark_beginner_atk", name: "초심자의 공격의 디아크", type: "fixed" },
-
-{ id: "dark_4dan", name: "4단 마왕의 디아크", type: "grade" }, { id: "dark_3dan", name: "3단 마왕의 디아크", type: "grade" },
-
-{ id: "dark_tamjil", name: "(탐질) 마왕의 디아크", type: "tamjil_mod" }, { id: "dark_jiltam", name: "(질탐) 마왕의 디아크", type: "tamjil_mod" }
-
-]
-
+  crest: [
+    { id: "none", name: "미장착", type: "fixed" }, { id: "crest_beginner_magna", name: "초심자의 매그너몬의 문장", type: "fixed" },
+    { id: "crest_yonggi_10", name: "용기의 문장 (+10)", type: "fixed" }, { id: "crest_seongsil_10", name: "성실의 문장 (+10)", type: "fixed" },
+    { id: "crest_alpha", name: "빛나는 알파몬의 문장", type: "plus" }, { id: "crest_omega", name: "빛나는 오메가몬의 문장", type: "plus" },
+    { id: "crest_lord", name: "빛나는 로드나이트몬의 문장", type: "plus" }, { id: "crest_dynas", name: "빛나는 듀나스몬의 문장", type: "plus" },
+    { id: "crest_magna_1", name: "매그너몬의 문장 (+1)", type: "fixed" }, { id: "crest_magna_x", name: "빛나는 매그너몬의 문장X", type: "fixed" },
+    { id: "crest_ygg", name: "이그드라실의 문장", type: "grade", grades: allGrades }
+  ],
+  capsule: [
+    { id: "none", name: "미장착", type: "fixed" }, { id: "cap_beginner_miracle", name: "초심자의 빛나는 기적의 캡슐", type: "fixed" },
+    { id: "cap_beginner_deepsea", name: "초심자의 심해의 캡슐", type: "fixed" }, { id: "cap_beginner_pride", name: "초심자의 긍지의 캡슐", type: "fixed" },
+    { id: "cap_red_v", name: "레드 백신 캡슐", type: "fixed" }, { id: "cap_red_d", name: "레드 데이터 캡슐", type: "fixed" }, { id: "cap_red_vi", name: "레드 바이러스 캡슐", type: "fixed" },
+    { id: "cap_shining_miracle", name: "빛나는 기적의 캡슐", type: "fixed" }, { id: "cap_deepsea", name: "심해의 캡슐", type: "fixed" }, { id: "cap_pride", name: "긍지의 캡슐", type: "fixed" },
+    { id: "cap_metal", name: "메탈 캡슐", type: "fixed" }, { id: "cap_shining_metal", name: "빛나는 메탈 캡슐", type: "fixed" }, { id: "cap_dark", name: "암흑 캡슐", type: "fixed" },
+    { id: "cap_black_dark", name: "칠흑빛 암흑 캡슐", type: "fixed" }, { id: "cap_abyss", name: "심연의 캡슐", type: "fixed" }, { id: "cap_hollow_abyss", name: "공허한 심연의 캡슐", type: "fixed" }
+  ],
+  earring: [
+    { id: "none", name: "미장착", type: "fixed" }, { id: "acc_beginner_ygg_ear", name: "초심자의 화려한 이그드라실", type: "fixed" },
+    { id: "acc_ygg_soft_ear", name: "은은한 이그드라실", type: "fixed" }, { id: "acc_ygg_bright_ear", name: "화려한 이그드라실", type: "fixed" },
+    { id: "acc_obsidian_ear", name: "옵시디언디지조이드", type: "fixed" }, { id: "acc_spider_ear", name: "거미 여왕", type: "fixed" }, { id: "acc_shining_spider_ear", name: "빛나는 거미 여왕", type: "fixed" }
+  ],
+  necklace: [
+    { id: "none", name: "미장착", type: "fixed" }, { id: "acc_beginner_ygg_neck", name: "초심자의 화려한 이그드라실", type: "fixed" },
+    { id: "acc_ygg_soft_neck", name: "은은한 이그드라실", type: "fixed" }, { id: "acc_ygg_bright_neck", name: "화려한 이그드라실", type: "fixed" },
+    { id: "acc_choi_neck", name: "최영재의 목걸이", type: "fixed" }, { id: "acc_gold_neck", name: "황금 장군", type: "fixed" }, { id: "acc_shining_gold_neck", name: "빛나는 황금 장군", type: "fixed" }
+  ],
+  ring: [
+    { id: "none", name: "미장착", type: "fixed" }, { id: "acc_beginner_ygg_ring", name: "초심자의 화려한 이그드라실", type: "fixed" },
+    { id: "acc_ygg_soft_ring", name: "은은한 이그드라실", type: "fixed" }, { id: "acc_ygg_bright_ring", name: "화려한 이그드라실", type: "fixed" },
+    { id: "acc_nibel_ring", name: "니벨룽겐의 반지", type: "fixed" }, { id: "acc_forest_ring", name: "깊은 숲 악마", type: "fixed" }, { id: "acc_shining_forest_ring", name: "빛나는 깊은 숲 악마", type: "fixed" }
+  ],
+  spirit: [
+    { id: "none", name: "미장착", type: "fixed" },
+    { id: "spirit_beginner_b_fire", name: "초심자의 불완전한 불의 스피릿(B)", type: "fixed" },
+    { id: "spirit_beginner_b_earth", name: "초심자의 불완전한 땅의 스피릿(B)", type: "fixed" },
+    { id: "spirit_beginner_b_water", name: "초심자의 불완전한 물의 스피릿(B)", type: "fixed" },
+    { id: "spirit_fire", name: "🔥 불의 스피릿", type: "spirit_mod" }, { id: "spirit_water", name: "💧 물의 스피릿", type: "spirit_mod" },
+    { id: "spirit_wind", name: "🌪️ 바람의 스피릿", type: "spirit_mod" }, { id: "spirit_earth", name: "🪨 땅의 스피릿", type: "spirit_mod" },
+    { id: "spirit_wood", name: "🌿 나무의 스피릿", type: "spirit_mod" }, { id: "spirit_ice", name: "❄️ 얼음의 스피릿", type: "spirit_mod" },
+    { id: "spirit_light", name: "✨ 빛의 스피릿", type: "spirit_mod" }, { id: "spirit_dark", name: "🌑 어둠의 스피릿", type: "spirit_mod" },
+    { id: "spirit_thunder", name: "⚡ 번개의 스피릿", type: "spirit_mod" }, { id: "spirit_steel", name: "⚙️ 강철의 스피릿", type: "spirit_mod" }
+  ],
+  crystal: [
+    { id: "none", name: "미장착", type: "fixed" },
+    { id: "crystal_hyun", name: "현무몬의 보옥", type: "plus" }, { id: "crystal_baek", name: "백호몬의 보옥", type: "plus" },
+    { id: "crystal_ju", name: "주작몬의 보옥", type: "plus" }, { id: "crystal_cheong", name: "청룡몬의 보옥", type: "plus" },
+    { id: "crystal_gumbi", name: "굼비라몬", type: "fixed" }, { id: "crystal_bigara", name: "비가라몬", type: "fixed" },
+    { id: "crystal_baji", name: "바지라몬", type: "fixed" }, { id: "crystal_sindra", name: "신드라몬", type: "fixed" },
+    { id: "crystal_magura", name: "마구라몬", type: "fixed" }, { id: "crystal_kadura", name: "카두라몬", type: "fixed" },
+    { id: "crystal_pajira", name: "파지라몬", type: "fixed" }, { id: "crystal_santira", name: "산티라몬", type: "fixed" },
+    { id: "crystal_indira", name: "인디라몬", type: "fixed" }, { id: "crystal_mihira", name: "미히라몬", type: "fixed" },
+    { id: "crystal_antira", name: "안티라몬", type: "fixed" }, { id: "crystal_manira", name: "마니라몬", type: "fixed" },
+    { id: "crystal_donggle", name: "동글몬의 보옥", type: "fixed" }
+  ],
+  dark: [
+    { id: "none", name: "미장착", type: "fixed" }, { id: "dark_beginner_atk", name: "초심자의 공격의 디아크", type: "fixed" },
+    { id: "dark_4dan", name: "4단 마왕의 디아크", type: "grade", grades: allGrades }, 
+    { id: "dark_3dan", name: "3단 마왕의 디아크", type: "grade", grades: allGrades },
+    { id: "dark_tamjil", name: "(탐질) 마왕의 디아크", type: "tamjil_mod" }, { id: "dark_jiltam", name: "(질탐) 마왕의 디아크", type: "tamjil_mod" }
+  ]
 };
 
-// 보옥(crystal) 개수를 3개 -> 1개로 하향 조정
-
+// 보옥 슬롯 개수 1개 하향 조정 구조 반영
 const equipGroups = [
-
-{ id: "crest", title: "문장 (3개)", count: 3 }, { id: "capsule", title: "캡슐 (3개)", count: 3 },
-
-{ id: "earring", title: "악세사리 - 귀걸이", count: 1 }, { id: "necklace", title: "악세사리 - 목걸이", count: 1 },
-
-{ id: "ring", title: "악세사리 - 반지", count: 1 }, { id: "spirit", title: "스피릿 (3개)", count: 3 },
-
-{ id: "crystal", title: "보옥 (1개)", count: 1 }, { id: "dark", title: "디아크", count: 1 }
-
+  { id: "crest", title: "문장 (3개)", count: 3 }, { id: "capsule", title: "캡슐 (3개)", count: 3 },
+  { id: "earring", title: "악세사리 - 귀걸이", count: 1 }, { id: "necklace", title: "악세사리 - 목걸이", count: 1 },
+  { id: "ring", title: "악세사리 - 반지", count: 1 }, { id: "spirit", title: "스피릿 (3개)", count: 3 },
+  { id: "crystal", title: "보옥 (1개)", count: 1 }, { id: "dark", title: "디아크", count: 1 }
 ];
 
-// 4. 패널 그리기
-
+// 4. 패널 그리기 함수
 function drawPanels() {
+  let container = document.getElementById('equip-container');
+  let finalHTML = "";
+  ['curr', 'comp'].forEach(side => {
+    let html = `<div class="equip-panel" id="panel-${side}"><div class="panel-h2">${side === 'curr' ? "현재 장착 장비 세팅" : "변경할 예상 장비 세팅"}</div>`;
+    equipGroups.forEach(g => {
+      html += `<div class="equipment-group"><div class="group-title">${g.title}</div><div class="grid-slots">`;
+      for(let i=1; i<=g.count; i++) {
+        let isFullRow = g.count === 1 ? "slot-full" : "";
+        let optionsHTML = uiCatalog[g.id].map(item => `<option value="${item.id}">${item.name}</option>`).join('');
+        html += `
+          <div class="slot ${isFullRow}">
+            <label>${g.title.split(' ')[0]} ${g.count > 1 ? i : ''}</label>
+            <div class="select-group">
+              <select class="item-base" id="base_${side}_${g.id}_${i}" data-side="${side}" data-group="${g.id}">${optionsHTML}</select>
+              <select class="item-mod" id="mod_${side}_${g.id}_${i}"></select>
+            </div>
+          </div>
+        `;
+      }
+      html += `</div></div>`;
+    });
+    html += `</div>`;
+    finalHTML += html;
+  });
+  container.innerHTML = finalHTML;
 
-let container = document.getElementById('equip-container');
-
-let finalHTML = "";
-
-['curr', 'comp'].forEach(side => {
-
-let html = `<div class="equip-panel" id="panel-${side}">
-
-<div class="panel-h2">${side === 'curr' ? "현재 장착 장비 세팅" : "변경할 예상 장비 세팅"}</div>`;
-
-
-equipGroups.forEach(g => {
-
-html += `<div class="equipment-group">
-
-<div class="group-title">${g.title}</div>
-
-<div class="grid-slots">`;
-
-for(let i=1; i<=g.count; i++) {
-
-let isFullRow = g.count === 1 ? "slot-full" : "";
-
-let optionsHTML = uiCatalog[g.id].map(item => <option value="${item.id}">${item.name}</option>).join('');
-
-html += `<div class="slot ${isFullRow}">
-
-<label>${g.title.split(' ')[0]} ${g.count > 1 ? i : ''}</label>
-
-<div class="select-group">
-
-<select class="item-base" id="base_${side}_${g.id}_${i}" data-side="${side}" data-group="${g.id}">${optionsHTML}</select>
-
-<select class="item-mod" id="mod_${side}_${g.id}_${i}"></select>
-
-</div>
-
-</div>`;
-
+  document.querySelectorAll('.item-base').forEach(sel => sel.addEventListener('change', handleBaseChange));
+  document.querySelectorAll('.item-mod').forEach(sel => sel.addEventListener('change', calculateStats));
 }
 
-html += </div></div>;
-
-});
-
-html += </div>;
-
-finalHTML += html;
-
-});
-
-container.innerHTML = finalHTML;
-
-
-document.querySelectorAll('.item-base').forEach(sel => sel.addEventListener('change', handleBaseChange));
-
-document.querySelectorAll('.item-mod').forEach(sel => sel.addEventListener('change', calculateStats));
-
-}
-
-// 5. 드롭다운 연동 로직
-
+// 5. 드롭다운 서브(Mod) 연동 로직 
 function handleBaseChange(event) {
+  const baseSelect = event.target;
+  const modSelect = baseSelect.nextElementSibling;
+  const groupId = baseSelect.dataset.group;
+  const selectedId = baseSelect.value;
 
-const baseSelect = event.target;
-
-const modSelect = baseSelect.nextElementSibling;
-
-const groupId = baseSelect.dataset.group;
-
-const selectedId = baseSelect.value;
-
-
-const itemDef = uiCatalog[groupId].find(i => i.id === selectedId);
-
-if (!itemDef || itemDef.type === "fixed" || selectedId === "none") {
-
-modSelect.style.display = "none";
-
-modSelect.innerHTML = "";
-
-} else if (itemDef.type === "plus") {
-
-modSelect.style.display = "block";
-
-let opts = "";
-
-for(let i=1; i<=10; i++) opts += <option value="+${i}">+${i}</option>;
-
-modSelect.innerHTML = opts;
-
-} else if (itemDef.type === "grade") {
-
-modSelect.style.display = "block";
-
-let grades = itemDef.grades || allGrades;
-
-modSelect.innerHTML = grades.map(g => <option value="${g}">${gradeDisplayMap[g]}</option>).join('');
-
-} else if (itemDef.type === "spirit_mod") {
-
-modSelect.style.display = "block";
-
-let opts = `
-
-<option value="com_h">완전(H)</option>
-
-<option value="com_b">완전(B)</option>
-
-<option value="inc_h">불완전(H)</option>
-
-<option value="inc_b">불완전(B)</option>`;
-
-doubleGrades.forEach((g, idx) => { opts += <option value="dbl_${idx}">더블(${g})</option>; });
-
-modSelect.innerHTML = opts;
-
-} else if (itemDef.type === "tamjil_mod") {
-
-modSelect.style.display = "block";
-
-modSelect.innerHTML = `
-
-<option value="c">하급</option>
-
-<option value="b">중급</option>
-
-<option value="a">상급</option>`;
-
+  const itemDef = uiCatalog[groupId].find(i => i.id === selectedId);
+  if (!itemDef || itemDef.type === "fixed" || selectedId === "none") {
+    modSelect.style.display = "none";
+    modSelect.innerHTML = "";
+  } else if (itemDef.type === "plus") {
+    modSelect.style.display = "block";
+    let opts = "";
+    for(let i=1; i<=10; i++) opts += `<option value="+${i}">+${i}</option>`;
+    modSelect.innerHTML = opts;
+  } else if (itemDef.type === "grade") {
+    modSelect.style.display = "block";
+    let grades = itemDef.grades || allGrades;
+    modSelect.innerHTML = grades.map(g => `<option value="${g}">${gradeDisplayMap[g]}</option>`).join('');
+  } else if (itemDef.type === "spirit_mod") {
+    modSelect.style.display = "block";
+    let opts = `
+      <option value="com_h">완전(H)</option>
+      <option value="com_b">완전(B)</option>
+      <option value="inc_h">불완전(H)</option>
+      <option value="inc_b">불완전(B)</option>`;
+    doubleGrades.forEach((g, idx) => { opts += `<option value="dbl_${idx}">더블(${g})</option>`; });
+    modSelect.innerHTML = opts;
+  } else if (itemDef.type === "tamjil_mod") {
+    modSelect.style.display = "block";
+    modSelect.innerHTML = `
+      <option value="c">하급</option>
+      <option value="b">중급</option>
+      <option value="a">상급</option>`;
+  }
+  calculateStats();
 }
 
-calculateStats();
-
-}
-
-// 6. 능력치 연산 및 화면 표시 스크립트 코어
-
+// 6. 능력치 실시간 연산 핵심 로직
 function calculateStats() {
+  const resultData = { curr: { ...baseStatsTemplate }, comp: { ...baseStatsTemplate } };
+  const activeSets = { curr: [], comp: [] };
 
-const resultData = { curr: { ...baseStatsTemplate }, comp: { ...baseStatsTemplate } };
+  ['curr', 'comp'].forEach(side => {
+    equipGroups.forEach(g => {
+      for(let i=1; i<=g.count; i++) {
+        const baseVal = document.getElementById(`base_${side}_${g.id}_${i}`).value;
+        const modVal = document.getElementById(`mod_${side}_${g.id}_${i}`).value;
 
-const activeSets = { curr: [], comp: [] };
+        let finalKey = baseVal;
+        if (modVal && baseVal !== "none") {
+          if (modVal.startsWith('+')) {
+            finalKey = `${baseVal}_${modVal.substring(1)}`;
+          } else {
+            finalKey = `${baseVal}_${modVal}`;
+          }
+        }
+        const statObj = itemDB[finalKey];
+        if (statObj) {
+          for (let key in baseStatsTemplate) {
+            if (statObj[key] !== undefined) resultData[side][key] += statObj[key];
+          }
+          if (statObj.set) activeSets[side].push(statObj.set);
+        }
+      }
+    });
 
-['curr', 'comp'].forEach(side => {
+    // 3세트 효과 계산 장착
+    for (let setName in accessorySetEffects) {
+      const matchCount = activeSets[side].filter(s => s === setName).length;
+      if (matchCount === 3) {
+        const eff = accessorySetEffects[setName];
+        for (let key in eff) {
+          resultData[side][key] += eff[key];
+        }
+      }
+    }
+  });
 
-equipGroups.forEach(g => {
-
-for(let i=1; i<=g.count; i++) {
-
-const baseVal = document.getElementById(base_${side}_${g.id}_${i}).value;
-
-const modVal = document.getElementById(mod_${side}_${g.id}_${i}).value;
-
-
-let finalKey = baseVal;
-
-if (modVal) {
-
-if (modVal.startsWith('+')) {
-
-finalKey = ${baseVal}_${modVal.substring(1)};
-
-} else {
-
-finalKey = ${baseVal}_${modVal};
-
-}
-
-}
-
-const statObj = itemDB[finalKey];
-
-if (statObj) {
-
-for (let key in baseStatsTemplate) {
-
-if (statObj[key] !== undefined) resultData[side][key] += statObj[key];
-
-}
-
-if (statObj.set) activeSets[side].push(statObj.set);
-
-}
-
-}
-
-});
-
-// 악세사리 세트 효과 검증 가산
-
-for (let setName in accessorySetEffects) {
-
-const matchCount = activeSets[side].filter(s => s === setName).length;
-
-if (matchCount === 3) {
-
-const eff = accessorySetEffects[setName];
-
-for (let key in eff) {
-
-resultData[side][key] += eff[key];
-
-}
-
-}
-
-}
-
-});
-
-// UI 스탯 그리드 갱신출력
-
-renderStatGrid('curr', resultData.curr);
-
-renderStatGrid('comp', resultData.comp, resultData.curr);
-
+  renderStatGrid('curr', resultData.curr);
+  renderStatGrid('comp', resultData.comp, resultData.curr);
 }
 
 function renderStatGrid(side, stats, compareStats = null) {
+  document.getElementById(`${side}-score`).innerText = stats.score;
+  let container = document.getElementById(`${side}-stats-container`);
+  let html = "";
 
-document.getElementById(${side}-score).innerText = stats.score;
+  for (let key in statLabels) {
+    let value = stats[key];
+    let diffHtml = "";
 
-let container = document.getElementById(${side}-stats-container);
+    if (compareStats) {
+      let diff = value - compareStats[key];
+      if (diff > 0) diffHtml = `<span class="diff-up">▲${diff}</span>`;
+      else if (diff < 0) diffHtml = `<span class="diff-down">▼${Math.abs(diff)}</span>`;
+      else diffHtml = `<span class="diff-same">-</span>`;
+    }
+    html += `<div class="stat-row"><span>${statLabels[key]}</span><span>${value} ${diffHtml}</span></div>`;
+  }
+  container.innerHTML = html;
 
-let html = "";
-
-for (let key in statLabels) {
-
-if (key === 'score') continue;
-
-let value = stats[key];
-
-let diffHtml = "";
-
-if (compareStats) {
-
-let diff = value - compareStats[key];
-
-if (diff > 0) diffHtml = <span class="diff-up">▲${diff}</span>;
-
-else if (diff < 0) diffHtml = <span class="diff-down">▼${Math.abs(diff)}</span>;
-
-else diffHtml = <span class="diff-same">-</span>;
-
-}
-
-html += `<div class="stat-row">
-
-<span>${statLabels[key]}</span>
-
-<span>${value} ${diffHtml}</span>
-
-</div>`;
-
-}
-
-container.innerHTML = html;
-
-if (side === 'comp' && compareStats) {
-
-let sDiff = stats.score - compareStats.score;
-
-let sDiffEl = document.getElementById('diff-score');
-
-if (sDiff > 0) sDiffEl.innerHTML = (<span class="diff-up">+${sDiff}</span>);
-
-else if (sDiff < 0) sDiffEl.innerHTML = (<span class="diff-down">${sDiff}</span>);
-
-else sDiffEl.innerHTML = "";
-
-}
-
+  if (side === 'comp' && compareStats) {
+    let sDiff = stats.score - compareStats.score;
+    let sDiffEl = document.getElementById('diff-score');
+    if (sDiff > 0) sDiffEl.innerHTML = `<span class="diff-up">+${sDiff}</span>`;
+    else if (sDiff < 0) sDiffEl.innerHTML = `<span class="diff-down">${sDiff}</span>`;
+    else sDiffEl.innerHTML = "";
+  }
 }
 
 // 7. 브라우저 저장소 (localStorage) 연동 데이터 로직
-
 function saveSetup() {
-
-const data = {};
-
-document.querySelectorAll('.item-base, .item-mod').forEach(sel => {
-
-data[sel.id] = { value: sel.value, display: sel.style.display };
-
-});
-
-localStorage.setItem('dr_calc_v2_setup', JSON.stringify(data));
-
-alert('💾 현재 세팅 정보가 브라우저에 안전하게 저장되었습니다!');
-
+  const data = {};
+  document.querySelectorAll('.item-base, .item-mod').forEach(sel => {
+    data[sel.id] = { value: sel.value, display: sel.style.display };
+  });
+  localStorage.setItem('dr_calc_v2_setup', JSON.stringify(data));
+  alert('💾 현재 세팅 정보가 브라우저에 안전하게 저장되었습니다!');
 }
 
 function loadSetup() {
+  const saved = localStorage.getItem('dr_calc_v2_setup');
+  if (!saved) {
+    alert('📂 저장된 데이터 내역을 찾을 수 없습니다.');
+    return;
+  }
+  const data = JSON.parse(saved);
 
-const saved = localStorage.getItem('dr_calc_v2_setup');
+  // 1단계: Base 값 먼저 복원 및 구조 생성 트리거
+  document.querySelectorAll('.item-base').forEach(sel => {
+    if (data[sel.id]) {
+      sel.value = data[sel.id].value;
+      handleBaseChange({ target: sel });
+    }
+  });
+  // 2단계: 동적 로드된 Mod 값 완벽 매칭 복원
+  document.querySelectorAll('.item-mod').forEach(sel => {
+    if (data[sel.id]) {
+      sel.value = data[sel.id].value;
+      sel.style.display = data[sel.id].display;
+    }
+  });
 
-if (!saved) {
-
-alert('📂 저장된 데이터 내역을 찾을 수 없습니다.');
-
-return;
-
-}
-
-const data = JSON.parse(saved);
-
-
-// 1단계: Base 값 먼저 복원 및 구조 생성 트리거
-
-document.querySelectorAll('.item-base').forEach(sel => {
-
-if (data[sel.id]) {
-
-sel.value = data[sel.id].value;
-
-handleBaseChange({ target: sel }); // 모디파이어 강제 동적 트리거
-
-}
-
-});
-
-// 2단계: 동적 로드된 Mod 값 완벽 매칭 복원
-
-document.querySelectorAll('.item-mod').forEach(sel => {
-
-if (data[sel.id]) {
-
-sel.value = data[sel.id].value;
-
-sel.style.display = data[sel.id].display;
-
-}
-
-});
-
-calculateStats();
-
-alert('📂 성공적으로 세팅 데이터를 불러왔습니다!');
-
+  calculateStats();
+  alert('📂 성공적으로 세팅 데이터를 불러왔습니다!');
 }
 
 // 초기 빌드 구동
-
 window.onload = () => {
-
-drawPanels();
-
-calculateStats();
-
+  drawPanels();
+  calculateStats();
 };
-
 </script>
-
 </body>
-
 </html>
-
-
